@@ -1,5 +1,3 @@
-# -*- encoding: utf-8 -*-
-
 Gem::Specification.new do |s|
   s.name = 'is_taggable'
   s.version = '0.1.0'
@@ -17,12 +15,6 @@ Gem::Specification.new do |s|
   s.summary = "tagging that doesn't want to be on steroids. it's skinny and happy to stay that way."
 
   if s.respond_to? :specification_version then
-    current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
     s.specification_version = 2
-
-    if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
-    else
-    end
-  else
   end
 end
