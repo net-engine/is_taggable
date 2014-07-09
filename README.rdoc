@@ -20,7 +20,7 @@ All you need is the 'is_taggable' declaration in your models:
   class User < ActiveRecord::Base
     is_taggable :tags, :languages
   end
-  
+
 In your forms, add a text fields for "tag_list" and/or "language_list" (matching the example model above):
 
   <%= f.text_field :tag_list %>
@@ -36,7 +36,7 @@ A comma is the default tag separator, but this can be easily changed:
 == Get it
 
   $ sudo gem install is_taggable
-  
+
 As a rails gem dependency:
 
   config.gem 'is_taggable'
