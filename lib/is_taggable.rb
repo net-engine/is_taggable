@@ -7,12 +7,12 @@ module IsTaggable
   class TagList < Array
     cattr_accessor :delimiter
     @@delimiter = ','
-    
+
     def initialize(list)
-      list = list.is_a?(Array) ? list : list.split(@@delimiter).collect(&:strip).reject(&:blank?)
+      list = list.is_a?(Array) ? list : list.split(@@delimiter).map(&:strip).reject(&:blank?)
       super
     end
-    
+
     def to_s
       join(@@delimiter)
     end
@@ -33,8 +33,9 @@ module IsTaggable
       klass.class_eval do
         include IsTaggable::TaggableMethods::InstanceMethods
 
-        has_many   :taggings, :as      => :taggable, :dependent => :destroy
-        has_many   :tags,     :through => :taggings
+        has_many :taggings, as: :taggable, dependent: :destroy
+        has_many :tags, through: :taggings
+
         after_save :save_tags
 
         tag_kinds.each do |k|
@@ -56,33 +57,34 @@ module IsTaggable
       end
 
       protected
-        def tag_list_name_for_kind(kind)
-          "@#{kind}_list"
-        end
-        
-        def tag_list_instance_variable(kind)
-          instance_variable_get(tag_list_name_for_kind(kind))
+
+      def tag_list_name_for_kind(kind)
+        "@#{kind}_list"
+      end
+
+      def tag_list_instance_variable(kind)
+        instance_variable_get(tag_list_name_for_kind(kind))
+      end
+
+      def save_tags
+        tag_kinds.each do |tag_kind|
+          delete_unused_tags(tag_kind)
+          add_new_tags(tag_kind)
         end
 
-        def save_tags
-          tag_kinds.each do |tag_kind|
-            delete_unused_tags(tag_kind)
-            add_new_tags(tag_kind)
-          end
+        taggings.each(&:save)
+      end
 
-          taggings.each(&:save)
-        end
-        
-        def delete_unused_tags(tag_kind)
-          tags.of_kind(tag_kind).each { |t| tags.delete(t) unless get_tag_list(tag_kind).include?(t.name) }
-        end
+      def delete_unused_tags(tag_kind)
+        tags.of_kind(tag_kind).each { |t| tags.delete(t) unless get_tag_list(tag_kind).include?(t.name) }
+      end
 
-        def add_new_tags(tag_kind)
-          tag_names = tags.of_kind(tag_kind).map(&:name)
-          get_tag_list(tag_kind).each do |tag_name| 
-            tags << Tag.find_or_initialize_with_name_like_and_kind(tag_name, tag_kind) unless tag_names.include?(tag_name)
-          end
+      def add_new_tags(tag_kind)
+        tag_names = tags.of_kind(tag_kind).map(&:name)
+        get_tag_list(tag_kind).each do |tag_name|
+          tags << Tag.find_or_initialize_with_name_like_and_kind(tag_name, tag_kind) unless tag_names.include?(tag_name)
         end
+      end
     end
   end
 end
